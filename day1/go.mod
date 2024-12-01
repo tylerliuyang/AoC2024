@@ -1,4 +1,4 @@
-module star1
+module day1
 
 go 1.23.0
 
