@@ -3,70 +3,68 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"os"
+	"strconv"
+	"strings"
 )
 
-func isvalidMASMAS(arr [][]rune, i int, j int) int {
-	result := 0
-	if (i-1) < 0 || (j-1) < 0 || (i+1) >= len(arr) || (j+1) >= len(arr[0]) {
-		return 0
-	}
-	if arr[i][j] != 'A' {
-		return 0
-	}
-	if arr[i-1][j-1] == 'M' && arr[i+1][j+1] == 'S' {
-		result++
-	}
-	if arr[i-1][j-1] == 'S' && arr[i+1][j+1] == 'M' {
-		result++
-	}
-	if arr[i-1][j+1] == 'M' && arr[i+1][j-1] == 'S' {
-		result++
-	}
-	if arr[i-1][j+1] == 'S' && arr[i+1][j-1] == 'M' {
-		result++
-	}
-	if arr[i+1][j-1] == 'M' && arr[i-1][j+1] == 'S' {
-		result++
-	}
-	if arr[i+1][j-1] == 'S' && arr[i-1][j+1] == 'M' {
-		result++
-	}
-	if arr[i+1][j+1] == 'M' && arr[i-1][j-1] == 'S' {
-		result++
-	}
-	if arr[i+1][j+1] == 'S' && arr[i-1][j-1] == 'M' {
-		result++
-	}
-	if result > 2 {
-		return 1
+func swap(list1 []int, hashMap map[int]map[int]struct{}) int {
+	for i := 0; i < len(list1); i++ {
+		for j := i + 1; j < len(list1); j++ {
+			if _, ok := hashMap[list1[i]][list1[j]]; ok {
+				temp := list1[i]
+				list1[i] = list1[j]
+				list1[j] = temp
+				return 1
+			}
+		}
 	}
 	return 0
 }
 
 func star2(scanner *bufio.Scanner) int {
 	total := 0
-	arr := make([][]rune, 0)
+	hashMap := make(map[int]map[int]struct{})
+
 	for scanner.Scan() {
 		line := scanner.Text()
-		innerarr := make([]rune, 0)
-		for _, a := range line {
-			innerarr = append(innerarr, a)
+
+		var num1, num2 int
+
+		_, err := fmt.Sscanf(line, "%d|%d", &num1, &num2)
+		if err != nil {
+			break
 		}
-		arr = append(arr, innerarr)
-	}
-	for _, row := range arr {
-		for _, char := range row {
-			fmt.Printf("%c ", char)
+		if _, ok := hashMap[num2]; !ok {
+			hashMap[num2] = make(map[int]struct{})
 		}
-		fmt.Println()
+		hashMap[num2][num1] = struct{}{}
 	}
 
-	for i := 0; i < len(arr); i++ {
-		for j := 0; j < len(arr[0]); j++ {
-			total += isvalidMASMAS(arr, i, j)
+	for scanner.Scan() {
+		line := scanner.Text()
+		nums := strings.Split(line, ",")
+		list1 := []int{}
+		for _, num := range nums {
+			n, err := strconv.Atoi(num)
+			if err != nil {
+				fmt.Fprintln(os.Stderr, "error parsing line:", err)
+				continue
+			}
+			list1 = append(list1, n)
 		}
+		if swap(list1, hashMap) == 0 {
+			continue
+		}
+
+		for swap(list1, hashMap) == 1 {
+
+		}
+
+		total += list1[len(list1)/2]
 	}
 
-	fmt.Println(total)
+	print(total)
+
 	return total
 }
